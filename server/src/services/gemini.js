@@ -1,18 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Gemini AI Service — Summarization Engine
-// ─────────────────────────────────────────────────────────────
-// Uses Google's Gemini 2.0 Flash to process meeting transcripts
-// and produce structured summaries with:
-//   - Executive summary
-//   - Key decisions
-//   - Action items (with owner + deadline)
-//   - Main topics discussed
-//   - Overall sentiment
-//
-// The prompt instructs Gemini to return valid JSON so we can
-// parse it directly and send it to the frontend.
-// ─────────────────────────────────────────────────────────────
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

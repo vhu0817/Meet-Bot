@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// API Client — Connects Frontend to Backend
-// ─────────────────────────────────────────────────────────────
-// This module provides typed functions for calling the backend
-// API. Every request automatically includes the Firebase auth
-// token so the server can verify the user.
-//
-// USAGE:
-//   import { api } from "@/lib/api";
-//   const sessions = await api.getSessions();
-//   const summary = await api.summarize(transcript);
-// ─────────────────────────────────────────────────────────────
-
 import { auth } from "@/lib/firebase";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -56,13 +43,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return res.json();
 }
 
-// ── API Functions ───────────────────────────────────────────
 
 export const api = {
-  // ── Health Check ─────────────────────────────────────────
   health: () => fetchAPI("/health"),
 
-  // ── Sessions ─────────────────────────────────────────────
   getSessions: () => fetchAPI("/sessions"),
 
   getSession: (id: string) => fetchAPI(`/sessions/${id}`),
@@ -83,7 +67,6 @@ export const api = {
   deleteSession: (id: string) =>
     fetchAPI(`/sessions/${id}`, { method: "DELETE" }),
 
-  // ── Bot ──────────────────────────────────────────────────
   launchBot: (meetLink: string) =>
     fetchAPI("/bot/start", {
       method: "POST",
@@ -98,7 +81,6 @@ export const api = {
   getBotTranscript: (botId: string, autoSummarize = true) =>
     fetchAPI(`/bot/transcript/${botId}?summarize=${autoSummarize}`),
 
-  // ── Summarize ────────────────────────────────────────────
   summarize: (transcript: Array<{ speaker: string; time: string; text: string }>) =>
     fetchAPI("/summarize", {
       method: "POST",

@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Summarize Routes — /api/summarize/*
-// ─────────────────────────────────────────────────────────────
-// Endpoints:
-//   POST /api/summarize → send a transcript, get back a summary
-//
-// This is now wired to the real Gemini 2.0 Flash service.
-// If GEMINI_API_KEY is not set, it falls back to mock data.
-// ─────────────────────────────────────────────────────────────
-
 const express = require("express");
 const router = express.Router();
 const { requireAuth } = require("../middleware/auth");

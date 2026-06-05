@@ -99,7 +99,6 @@ export default function DashboardPage() {
     if (user) fetchSessions();
   }, [user]);
 
-  // ── Bot status polling ────────────────────────────────────
   const pollBotStatus = useCallback(async (botId: string) => {
     try {
       const data = await api.getBotStatus(botId);
@@ -190,7 +189,6 @@ export default function DashboardPage() {
     }
   }
 
-  // ── Launch bot ────────────────────────────────────────────
   const handleLaunch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!meetLink.trim()) return;
@@ -221,7 +219,6 @@ export default function DashboardPage() {
     }
   };
 
-  // ── Stop bot ──────────────────────────────────────────────
   const handleStopBot = async () => {
     if (!activeBot) return;
     stopPolling();
@@ -245,7 +242,6 @@ export default function DashboardPage() {
     await handleBotDone(activeBot.id);
   };
 
-  // ── Dismiss active bot ────────────────────────────────────
   const handleDismissBot = () => {
     stopPolling();
     setActiveBot(null);
@@ -515,7 +511,6 @@ export default function DashboardPage() {
   );
 }
 
-// ── Utility functions ───────────────────────────────────────
 
 function estimateDuration(transcript: Array<{ time: string }>): string {
   if (!transcript || transcript.length === 0) return "Unknown";

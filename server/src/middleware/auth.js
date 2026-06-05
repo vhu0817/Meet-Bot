@@ -1,24 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Auth Middleware — Protects API Routes
-// ─────────────────────────────────────────────────────────────
-// HOW IT WORKS:
-//   1. Frontend logs in via Firebase → gets a JWT token
-//   2. Frontend sends that token in every API request:
-//      fetch("/api/sessions", {
-//        headers: { Authorization: "Bearer <token>" }
-//      })
-//   3. This middleware intercepts the request, extracts the token,
-//      and asks Firebase Admin to verify it
-//   4. If valid → attaches user info to req.user and continues
-//   5. If invalid → returns 401 Unauthorized
-//
-// USAGE IN ROUTES:
-//   const { requireAuth } = require("../middleware/auth");
-//   router.get("/", requireAuth, async (req, res) => {
-//     console.log(req.user.uid); // the verified user's Firebase UID
-//   });
-// ─────────────────────────────────────────────────────────────
-
 const { admin } = require("../config/firebase");
 
 async function requireAuth(req, res, next) {

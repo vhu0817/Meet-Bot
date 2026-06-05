@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import styles from "./session.module.css";
 
-// ── Types ───────────────────────────────────────────────────
 interface TranscriptLine {
   speaker: string;
   time: string;
@@ -39,7 +38,6 @@ interface SessionData {
   summary: Summary;
 }
 
-// ── Fallback mock data ──────────────────────────────────────
 const MOCK_TRANSCRIPT: TranscriptLine[] = [
   { speaker: "Sarah", time: "10:02", text: "Alright, let's kick things off. Can everyone hear me okay?" },
   { speaker: "Mike", time: "10:02", text: "Yeah, audio is clear on my end." },
@@ -73,7 +71,6 @@ const MOCK_SUMMARY: Summary = {
   meeting_duration_estimate: "52 minutes",
 };
 
-// ── Speaker colors ──────────────────────────────────────────
 const SPEAKER_COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#14b8a6"];
 
 function getSpeakerColor(speaker: string, allSpeakers: string[]): string {

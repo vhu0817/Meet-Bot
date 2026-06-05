@@ -1,18 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Firebase Admin Config (Server-Side)
-// ─────────────────────────────────────────────────────────────
-// This initializes the Firebase ADMIN SDK — used on the server to:
-//   1. Verify user auth tokens (is this request from a real user?)
-//   2. Read/write Firestore directly (no client SDK needed)
-//
-// Supports TWO ways to provide the service account:
-//   1. JSON file: set FIREBASE_SERVICE_ACCOUNT_PATH (local dev)
-//   2. JSON string: set FIREBASE_SERVICE_ACCOUNT_JSON (cloud deploy)
-//
-// For Render/Heroku: paste the entire JSON content into the
-// FIREBASE_SERVICE_ACCOUNT_JSON env var (as a single-line string).
-// ─────────────────────────────────────────────────────────────
-
 const admin = require("firebase-admin");
 const path = require("path");
 

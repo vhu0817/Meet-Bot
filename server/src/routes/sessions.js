@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Session Routes — /api/sessions/*
-// ─────────────────────────────────────────────────────────────
-// CRUD endpoints for meeting sessions, backed by Firestore.
-// If Firestore isn't configured, falls back to mock data.
-//
-// Endpoints:
-//   GET    /api/sessions       → list all sessions for a user
-//   GET    /api/sessions/:id   → get a single session's details
-//   POST   /api/sessions       → create a new session
-//   DELETE /api/sessions/:id   → delete a session
-// ─────────────────────────────────────────────────────────────
-
 const express = require("express");
 const router = express.Router();
 const { requireAuth } = require("../middleware/auth");
@@ -101,10 +88,6 @@ const MOCK_SESSION_DETAIL = {
   },
 };
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/sessions
-// Returns all sessions for the logged-in user.
-// ─────────────────────────────────────────────────────────────
 router.get("/", requireAuth, async (req, res) => {
   try {
     // If Firestore isn't configured, return mock data
@@ -147,10 +130,6 @@ router.get("/", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/sessions/:id
-// Returns full details of a single session (transcript + summary).
-// ─────────────────────────────────────────────────────────────
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,10 +159,6 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// POST /api/sessions
-// Create a new session (typically called after a bot finishes).
-// ─────────────────────────────────────────────────────────────
 router.post("/", requireAuth, async (req, res) => {
   try {
     const { title, meetLink, transcript, summary, duration, participants } = req.body;
@@ -249,10 +224,6 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// DELETE /api/sessions/:id
-// Delete a session and its associated data.
-// ─────────────────────────────────────────────────────────────
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;

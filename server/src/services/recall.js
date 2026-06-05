@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Recall.ai Service — Meeting Bot Management
-// ─────────────────────────────────────────────────────────────
-
 const axios = require("axios");
 
 const RECALL_API_KEY = process.env.RECALL_API_KEY;
@@ -26,7 +22,6 @@ const recallAPI = axios.create({
   maxRedirects: 5,
 });
 
-// ── Create Bot ──────────────────────────────────────────────
 async function createBot(meetLink, botName = "MeetScribe Bot") {
   if (!isConfigured) return getMockBot(meetLink);
 
@@ -61,7 +56,6 @@ async function createBot(meetLink, botName = "MeetScribe Bot") {
   }
 }
 
-// ── Get Bot Status ──────────────────────────────────────────
 async function getBotStatus(botId) {
   if (!isConfigured) return { id: botId, status: "listening" };
 
@@ -82,7 +76,6 @@ async function getBotStatus(botId) {
   }
 }
 
-// ── Stop Bot ────────────────────────────────────────────────
 async function stopBot(botId) {
   if (!isConfigured) return { id: botId, status: "stopped" };
 
@@ -100,13 +93,6 @@ async function stopBot(botId) {
   }
 }
 
-// ── Get Transcript (NEW API) ────────────────────────────────
-// The old /bot/{id}/transcript/ endpoint is DEPRECATED.
-// New flow:
-//   1. GET /bot/{id}/ → recordings[0].media_shortcuts.transcript
-//   2. Download the JSON from transcript.data.download_url
-//   3. Parse the diarized JSON into our format
-// ─────────────────────────────────────────────────────────────
 async function getTranscript(botId) {
   if (!isConfigured) return getMockTranscript();
 
@@ -195,7 +181,6 @@ async function getTranscript(botId) {
   }
 }
 
-// ── Helpers ─────────────────────────────────────────────────
 
 function mapRecallStatus(statusChanges) {
   if (!statusChanges || statusChanges.length === 0) return "joining";

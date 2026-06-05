@@ -1,14 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Signup Page — NOW CONNECTED TO FIREBASE
-// ─────────────────────────────────────────────────────────────
-// What changed from the old version:
-//   1. Added useAuth() hook to get signupEmail and loginGoogle
-//   2. handleSignup now calls Firebase createUserWithEmailAndPassword
-//   3. Google button now calls Firebase signInWithPopup
-//   4. On success → redirect to /dashboard
-//   5. On error → show the error message to the user
-// ─────────────────────────────────────────────────────────────
-
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";

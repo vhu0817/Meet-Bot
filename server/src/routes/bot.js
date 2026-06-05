@@ -1,32 +1,9 @@
-// ─────────────────────────────────────────────────────────────
-// Bot Routes — /api/bot/*
-// ─────────────────────────────────────────────────────────────
-// These endpoints control the meeting bot via Recall.ai:
-//   POST /api/bot/start        → deploy a bot to join a Google Meet
-//   GET  /api/bot/status/:id   → check the bot's current status
-//   POST /api/bot/stop/:id     → remove the bot from the meeting
-//   GET  /api/bot/transcript/:id → get the transcript after meeting
-//
-// The full bot lifecycle:
-//   1. User pastes a Meet link → POST /api/bot/start
-//   2. Frontend polls status   → GET  /api/bot/status/:id
-//   3. User clicks stop        → POST /api/bot/stop/:id
-//   4. Fetch transcript        → GET  /api/bot/transcript/:id
-//   5. Send to Gemini          → POST /api/summarize (separate route)
-//   6. Save session            → POST /api/sessions (separate route)
-// ─────────────────────────────────────────────────────────────
-
 const express = require("express");
 const router = express.Router();
 const { requireAuth } = require("../middleware/auth");
 const recallService = require("../services/recall");
 const geminiService = require("../services/gemini");
 
-// ─────────────────────────────────────────────────────────────
-// POST /api/bot/start
-// Deploy a bot to join a Google Meet meeting.
-// Body: { meetLink: "https://meet.google.com/abc-defg-hij" }
-// ─────────────────────────────────────────────────────────────
 router.post("/start", requireAuth, async (req, res) => {
   try {
     const { meetLink } = req.body;
@@ -52,11 +29,6 @@ router.post("/start", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/bot/status/:id
-// Check the current status of a deployed bot.
-// Returns: { id, status, statusChanges, meetingUrl }
-// ─────────────────────────────────────────────────────────────
 router.get("/status/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -68,10 +40,6 @@ router.get("/status/:id", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// POST /api/bot/stop/:id
-// Remove the bot from the meeting. Irreversible.
-// ─────────────────────────────────────────────────────────────
 router.post("/stop/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -86,13 +54,6 @@ router.post("/stop/:id", requireAuth, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/bot/transcript/:id
-// Get the transcript for a completed bot session.
-// Optionally auto-summarize with Gemini.
-// Query params:
-//   ?summarize=true → also run Gemini summarization
-// ─────────────────────────────────────────────────────────────
 router.get("/transcript/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;

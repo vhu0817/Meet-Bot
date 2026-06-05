@@ -1,21 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Auth Context
-// ─────────────────────────────────────────────────────────────
-// This wraps the entire app and provides:
-//   - user        → the currently logged-in Firebase user (or null)
-//   - loading     → true while Firebase checks if user is logged in
-//   - loginEmail  → sign in with email + password
-//   - signupEmail → create account with email + password
-//   - loginGoogle → sign in with Google popup
-//   - logout      → sign out
-//
-// HOW IT WORKS:
-//   Firebase has a listener called onAuthStateChanged. It fires
-//   whenever the user logs in or out. We listen to it and store
-//   the user in React state. Every component that calls useAuth()
-//   gets the current user automatically.
-// ─────────────────────────────────────────────────────────────
-
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
