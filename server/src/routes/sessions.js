@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { requireAuth } = require("../middleware/auth");
 const { db } = require("../config/firebase");
+const vectorStore = require("../services/vectorStore");
 
 // ── Mock data (used when Firestore isn't configured) ────────
 const MOCK_SESSIONS = [
@@ -199,6 +200,16 @@ router.post("/", requireAuth, async (req, res) => {
     const docRef = await db.collection("sessions").add(sessionData);
     console.log(`📝 Session created: ${docRef.id} — "${title}"`);
 
+    // Index the transcript for RAG in the background — never block the response.
+    vectorStore
+      .indexSession({
+        sessionId: docRef.id,
+        userId: req.user.uid,
+        title,
+        transcript: sessionData.transcript,
+      })
+      .catch((e) => console.error("Background index failed:", e.message));
+
     res.json({ success: true, session: { id: docRef.id, ...sessionData } });
   } catch (error) {
     console.error("Session create error:", error.message || error);
@@ -244,6 +255,11 @@ router.delete("/:id", requireAuth, async (req, res) => {
 
     await db.collection("sessions").doc(id).delete();
     console.log(`🗑️ Session ${id} deleted`);
+
+    vectorStore
+      .deleteSessionChunks(id)
+      .catch((e) => console.error("Chunk cleanup failed:", e.message));
+
     res.json({ success: true, id });
   } catch (error) {
     console.error("Session delete error:", error);
