@@ -22,6 +22,14 @@ interface Message {
   sources?: Source[];
 }
 
+interface HistoryItem {
+  id: string;
+  question: string;
+  answer: string;
+  sources?: Source[];
+  createdAt: string;
+}
+
 const SUGGESTIONS = [
   "What decisions were made last week?",
   "What are my open action items?",
@@ -29,10 +37,19 @@ const SUGGESTIONS = [
   "Who owns the API launch?",
 ];
 
+// Older transcripts stored bad caption timestamps as "NaN:NaN" — hide them.
+function cleanTime(time: string) {
+  return !time || time.includes("NaN") ? "" : time;
+}
+function cleanSnippet(text: string) {
+  return text.replace(/\[NaN:NaN\]\s*/g, "");
+}
+
 export default function AskPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const endRef = useRef<HTMLDivElement>(null);
@@ -44,6 +61,19 @@ export default function AskPage() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const loadHistory = async () => {
+    try {
+      const data = await api.getAskHistory();
+      setHistory(data.history || []);
+    } catch (err) {
+      console.warn("Could not load ask history:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) loadHistory();
+  }, [user]);
 
   const handleLogout = async () => {
     await logout();
@@ -64,6 +94,7 @@ export default function AskPage() {
         ...prev,
         { role: "assistant", text: data.answer, sources: data.sources || [] },
       ]);
+      loadHistory();
     } catch (err) {
       console.warn("Ask failed:", err);
       setMessages((prev) => [
@@ -75,6 +106,24 @@ export default function AskPage() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openHistory = (item: HistoryItem) => {
+    setMessages([
+      { role: "user", text: item.question },
+      { role: "assistant", text: item.answer, sources: item.sources || [] },
+    ]);
+  };
+
+  const removeHistory = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setHistory((prev) => prev.filter((h) => h.id !== id));
+    try {
+      await api.deleteAskHistory(id);
+    } catch (err) {
+      console.warn("Could not delete history item:", err);
+      loadHistory();
     }
   };
 
@@ -123,73 +172,102 @@ export default function AskPage() {
             <h1 className={styles.pageTitle}>Ask your meetings</h1>
             <p className={styles.pageSubtitle}>Search across every transcript with AI — answers cite the meetings they came from</p>
           </div>
+          {messages.length > 0 && (
+            <button className="btn btn-ghost" onClick={() => setMessages([])}>
+              + New chat
+            </button>
+          )}
         </header>
 
-        <div className={ask.chat}>
-          {messages.length === 0 ? (
-            <div className={ask.empty}>
-              <div className={ask.emptyIcon}>💬</div>
-              <h3>Ask anything about your past meetings</h3>
-              <p>Answers are grounded in your own transcripts and cite their sources.</p>
-              <div className={ask.suggestions}>
-                {SUGGESTIONS.map((s) => (
-                  <button key={s} className={ask.suggestion} onClick={() => send(s)}>
-                    {s}
+        <div className={ask.workspace}>
+          <div className={ask.chat}>
+            {messages.length === 0 ? (
+              <div className={ask.empty}>
+                <div className={ask.emptyIcon}>💬</div>
+                <h3>Ask anything about your past meetings</h3>
+                <p>Answers are grounded in your own transcripts and cite their sources.</p>
+                <div className={ask.suggestions}>
+                  {SUGGESTIONS.map((s) => (
+                    <button key={s} className={ask.suggestion} onClick={() => send(s)}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className={ask.messages}>
+                {messages.map((m, i) => (
+                  <div key={i} className={`${ask.message} ${m.role === "user" ? ask.user : ask.assistant}`}>
+                    <div className={ask.bubble}>{m.text}</div>
+                    {m.sources && m.sources.length > 0 && (
+                      <div className={ask.sources}>
+                        <div className={ask.sourcesLabel}>Sources</div>
+                        {m.sources.map((src) => (
+                          <Link key={src.n} href={`/session/${src.sessionId}`} className={ask.source}>
+                            <div className={ask.sourceTop}>
+                              <span className={ask.sourceNum}>[{src.n}]</span>
+                              <span className={ask.sourceTitle}>{src.title}</span>
+                              {cleanTime(src.time) && <span className={ask.sourceTime}>⏱ {cleanTime(src.time)}</span>}
+                            </div>
+                            <p className={ask.sourceSnippet}>{cleanSnippet(src.snippet)}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {loading && (
+                  <div className={`${ask.message} ${ask.assistant}`}>
+                    <div className={`${ask.bubble} ${ask.thinking}`}>
+                      <span className="dot-pulse" /> Searching your meetings…
+                    </div>
+                  </div>
+                )}
+                <div ref={endRef} />
+              </div>
+            )}
+
+            <form
+              className={ask.composer}
+              onSubmit={(e) => {
+                e.preventDefault();
+                send(input);
+              }}
+            >
+              <input
+                className={`input ${ask.composerInput}`}
+                placeholder="Ask about your meetings…"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={loading}
+              />
+              <button type="submit" className="btn btn-primary" disabled={loading || !input.trim()}>
+                {loading ? "…" : "Ask"}
+              </button>
+            </form>
+          </div>
+
+          <aside className={ask.historyPanel}>
+            <div className={ask.historyHeader}>History</div>
+            {history.length === 0 ? (
+              <p className={ask.historyEmpty}>Your past questions will show up here.</p>
+            ) : (
+              <div className={ask.historyList}>
+                {history.map((item) => (
+                  <button key={item.id} className={ask.historyItem} onClick={() => openHistory(item)}>
+                    <span className={ask.historyQuestion}>{item.question}</span>
+                    <span
+                      className={ask.historyDelete}
+                      onClick={(e) => removeHistory(item.id, e)}
+                      aria-label="Delete"
+                    >
+                      ✕
+                    </span>
                   </button>
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className={ask.messages}>
-              {messages.map((m, i) => (
-                <div key={i} className={`${ask.message} ${m.role === "user" ? ask.user : ask.assistant}`}>
-                  <div className={ask.bubble}>{m.text}</div>
-                  {m.sources && m.sources.length > 0 && (
-                    <div className={ask.sources}>
-                      <div className={ask.sourcesLabel}>Sources</div>
-                      {m.sources.map((src) => (
-                        <Link key={src.n} href={`/session/${src.sessionId}`} className={ask.source}>
-                          <div className={ask.sourceTop}>
-                            <span className={ask.sourceNum}>[{src.n}]</span>
-                            <span className={ask.sourceTitle}>{src.title}</span>
-                            <span className={ask.sourceTime}>⏱ {src.time}</span>
-                          </div>
-                          <p className={ask.sourceSnippet}>{src.snippet}</p>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {loading && (
-                <div className={`${ask.message} ${ask.assistant}`}>
-                  <div className={`${ask.bubble} ${ask.thinking}`}>
-                    <span className="dot-pulse" /> Searching your meetings…
-                  </div>
-                </div>
-              )}
-              <div ref={endRef} />
-            </div>
-          )}
-
-          <form
-            className={ask.composer}
-            onSubmit={(e) => {
-              e.preventDefault();
-              send(input);
-            }}
-          >
-            <input
-              className={`input ${ask.composerInput}`}
-              placeholder="Ask about your meetings…"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={loading}
-            />
-            <button type="submit" className="btn btn-primary" disabled={loading || !input.trim()}>
-              {loading ? "…" : "Ask"}
-            </button>
-          </form>
+            )}
+          </aside>
         </div>
       </main>
     </div>

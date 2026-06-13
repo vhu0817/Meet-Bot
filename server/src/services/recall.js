@@ -204,8 +204,10 @@ function mapRecallStatus(statusChanges) {
 }
 
 function formatTimestamp(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
+  const n = Number(seconds);
+  if (!Number.isFinite(n) || n < 0) return "0:00";
+  const mins = Math.floor(n / 60);
+  const secs = Math.floor(n % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 

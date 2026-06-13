@@ -1,3 +1,10 @@
+.workspace {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
 .chat {
   display: flex;
   flex-direction: column;
@@ -163,4 +170,80 @@
 }
 .composerInput {
   flex: 1;
+}
+
+.historyPanel {
+  width: 280px;
+  min-width: 280px;
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.historyHeader {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.historyEmpty {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.historyItem:hover {
+  border-color: var(--accent);
+}
+.historyQuestion {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.historyDelete {
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.historyDelete:hover {
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    flex-direction: column;
+  }
+  .historyPanel {
+    width: 100%;
+    min-width: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 16px;
+  }
 }

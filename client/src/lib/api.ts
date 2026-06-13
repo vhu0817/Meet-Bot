@@ -92,4 +92,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ question, topK }),
     }),
+
+  getAskHistory: () => fetchAPI("/ask/history"),
+
+  deleteAskHistory: (id: string) =>
+    fetchAPI(`/ask/history/${id}`, { method: "DELETE" }),
 };
