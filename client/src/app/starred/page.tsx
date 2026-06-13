@@ -61,6 +61,7 @@ export default function StarredPage() {
         <nav className={styles.sidebarNav}>
           <Link href="/dashboard" className={styles.navItem}><span>🏠</span> Dashboard</Link>
           <Link href="/sessions" className={styles.navItem}><span>📋</span> Sessions</Link>
+          <Link href="/ask" className={styles.navItem}><span>💬</span> Ask</Link>
           <Link href="/starred" className={`${styles.navItem} ${styles.navItemActive}`}><span>⭐</span> Starred</Link>
           <Link href="/settings" className={styles.navItem}><span>⚙️</span> Settings</Link>
         </nav>

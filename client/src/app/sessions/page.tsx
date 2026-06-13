@@ -68,6 +68,9 @@ export default function SessionsPage() {
           <Link href="/sessions" className={`${styles.navItem} ${styles.navItemActive}`}>
             <span>📋</span> Sessions
           </Link>
+          <Link href="/ask" className={styles.navItem}>
+            <span>💬</span> Ask
+          </Link>
           <Link href="/starred" className={styles.navItem}>
             <span>⭐</span> Starred
           </Link>

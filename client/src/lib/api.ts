@@ -86,4 +86,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ transcript }),
     }),
+
+  ask: (question: string, topK = 5) =>
+    fetchAPI("/ask", {
+      method: "POST",
+      body: JSON.stringify({ question, topK }),
+    }),
 };
