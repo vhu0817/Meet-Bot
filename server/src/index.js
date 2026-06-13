@@ -7,6 +7,7 @@ const cors = require("cors");
 const botRoutes = require("./routes/bot");
 const sessionRoutes = require("./routes/sessions");
 const summarizeRoutes = require("./routes/summarize");
+const askRoutes = require("./routes/ask");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -40,6 +41,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/bot", botRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/summarize", summarizeRoutes);
+app.use("/api/ask", askRoutes);
 
 app.listen(PORT, () => {
   console.log(`\n⚡ MeetScribe API running on http://localhost:${PORT}`);
