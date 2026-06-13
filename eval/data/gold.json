@@ -1,0 +1,86 @@
+[
+  {
+    "id": "roadmap_q2",
+    "title": "Q2 Product Roadmap Review",
+    "transcript": [
+      { "speaker": "Sarah", "time": "0:02", "text": "Alright everyone, the goal today is to lock down our Q2 priorities. We have twelve candidate features and we can realistically ship four." },
+      { "speaker": "Mike", "time": "0:05", "text": "From engineering, the onboarding flow refactor is the highest ROI. It directly unblocks new user activation." },
+      { "speaker": "Alex", "time": "0:08", "text": "Design agrees. We already have the onboarding mockups ready to hand off." },
+      { "speaker": "Sarah", "time": "0:10", "text": "Good. Let's make onboarding refactor a P1. What's the status on API v2?" },
+      { "speaker": "Mike", "time": "0:13", "text": "API v2 is about 80 percent done. We need two more weeks to stabilize the auth endpoints." },
+      { "speaker": "Sarah", "time": "0:15", "text": "Okay, API v2 is also P1. Mike, can you own the launch timeline and send me a draft by Friday?" },
+      { "speaker": "Mike", "time": "0:16", "text": "Yes, I'll have the draft to you by Friday." },
+      { "speaker": "Sarah", "time": "0:18", "text": "Alex, please share the design mockups with engineering by Monday so they can start." },
+      { "speaker": "Alex", "time": "0:19", "text": "Will do, I'll send them Monday morning." },
+      { "speaker": "Sarah", "time": "0:21", "text": "Great meeting, team. Feeling good about this quarter." }
+    ],
+    "reference": {
+      "executive_summary": "The team reviewed Q2 priorities and narrowed twelve candidate features down to a shippable set. Onboarding flow refactor and API v2 launch were both confirmed as P1 items, with owners and deadlines assigned.",
+      "key_decisions": [
+        "Onboarding flow refactor is P1",
+        "API v2 launch is P1",
+        "Q2 scope narrowed to four shippable features"
+      ],
+      "action_items": [
+        { "owner": "Mike", "task": "Send API v2 launch timeline draft", "deadline": "Friday" },
+        { "owner": "Alex", "task": "Share design mockups with engineering", "deadline": "Monday" }
+      ],
+      "sentiment": "positive",
+      "participants_detected": ["Sarah", "Mike", "Alex"]
+    }
+  },
+  {
+    "id": "eng_standup",
+    "title": "Engineering Standup",
+    "transcript": [
+      { "speaker": "Priya", "time": "0:01", "text": "Quick standup. Let's go around. Tom, what's your status?" },
+      { "speaker": "Tom", "time": "0:03", "text": "The auth service deployment is blocked. The staging environment keeps failing health checks." },
+      { "speaker": "Priya", "time": "0:05", "text": "That's a blocker for the release. Can you pair with Raj to debug it today?" },
+      { "speaker": "Tom", "time": "0:06", "text": "Yeah, Raj and I will dig into it this afternoon." },
+      { "speaker": "Raj", "time": "0:07", "text": "Works for me. I think it's the new environment variable that's missing in staging." },
+      { "speaker": "Priya", "time": "0:09", "text": "Let's fix it by end of day so we don't slip the release. Anything else?" },
+      { "speaker": "Tom", "time": "0:10", "text": "Frontend is actually ahead of schedule, so no concerns there." },
+      { "speaker": "Priya", "time": "0:11", "text": "Perfect. Raj, can you update the deployment runbook once it's fixed?" },
+      { "speaker": "Raj", "time": "0:12", "text": "Sure, I'll update the runbook after we resolve it." }
+    ],
+    "reference": {
+      "executive_summary": "The standup surfaced a blocking issue with the auth service deployment failing staging health checks, likely due to a missing environment variable. Tom and Raj were assigned to debug it by end of day to protect the release timeline. Frontend work is ahead of schedule.",
+      "key_decisions": [
+        "Auth service deployment blocker must be fixed by end of day to avoid slipping the release"
+      ],
+      "action_items": [
+        { "owner": "Tom", "task": "Pair with Raj to debug auth service staging failure", "deadline": "End of day" },
+        { "owner": "Raj", "task": "Update the deployment runbook after the fix", "deadline": "TBD" }
+      ],
+      "sentiment": "neutral",
+      "participants_detected": ["Priya", "Tom", "Raj"]
+    }
+  },
+  {
+    "id": "investor_prep",
+    "title": "Investor Demo Prep",
+    "transcript": [
+      { "speaker": "Dana", "time": "0:02", "text": "We have the investor demo Thursday. Let's finalize the deck and the demo flow today." },
+      { "speaker": "Leo", "time": "0:04", "text": "The market sizing slide still feels weak. The TAM number needs a credible source." },
+      { "speaker": "Dana", "time": "0:06", "text": "Agreed. Leo, can you revise the market sizing slide with a sourced TAM by Wednesday?" },
+      { "speaker": "Leo", "time": "0:07", "text": "Yes, I'll revise it and add the source by Wednesday." },
+      { "speaker": "Maya", "time": "0:09", "text": "For the live demo, I think we should show the analytics dashboard first, then the AI summary feature." },
+      { "speaker": "Dana", "time": "0:11", "text": "I like that order. Let's lock the demo flow as dashboard first, then AI summary." },
+      { "speaker": "Maya", "time": "0:13", "text": "I'll rehearse the demo flow twice before Thursday to make sure it's smooth." },
+      { "speaker": "Dana", "time": "0:15", "text": "Perfect. Let's regroup Wednesday afternoon for a final dry run." }
+    ],
+    "reference": {
+      "executive_summary": "The team prepared for Thursday's investor demo by finalizing the deck and demo flow. They decided to lead the live demo with the analytics dashboard followed by the AI summary feature, and flagged the market sizing slide as needing a sourced TAM figure.",
+      "key_decisions": [
+        "Demo flow will be analytics dashboard first, then AI summary feature",
+        "Final dry run scheduled for Wednesday afternoon"
+      ],
+      "action_items": [
+        { "owner": "Leo", "task": "Revise market sizing slide with a sourced TAM", "deadline": "Wednesday" },
+        { "owner": "Maya", "task": "Rehearse the demo flow twice before the demo", "deadline": "Thursday" }
+      ],
+      "sentiment": "positive",
+      "participants_detected": ["Dana", "Leo", "Maya"]
+    }
+  }
+]
