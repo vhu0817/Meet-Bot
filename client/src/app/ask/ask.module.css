@@ -179,40 +179,73 @@
   padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
+  gap: 14px;
+  overflow: hidden;
 }
-.historyHeader {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+.newChatBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.newChatBtn:hover {
+  border-color: var(--accent);
+  background: var(--bg-surface);
 }
 .historyEmpty {
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
 }
-.historyList {
+.historyScroll {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.historyGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.historyGroupLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 4px 8px;
 }
 .historyItem {
   display: flex;
   align-items: center;
   gap: 8px;
   text-align: left;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  padding: 9px 10px;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: background 0.15s ease;
 }
 .historyItem:hover {
-  border-color: var(--accent);
+  background: var(--bg-card);
+}
+.historyItem:hover .historyDelete {
+  opacity: 1;
+}
+.historyItemActive {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
 }
 .historyQuestion {
   flex: 1;
@@ -228,6 +261,8 @@
   padding: 2px 4px;
   border-radius: 4px;
   flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 .historyDelete:hover {
   color: var(--red);

@@ -16,18 +16,17 @@ interface Source {
   score: number;
 }
 
-interface Message {
+interface Turn {
   role: "user" | "assistant";
   text: string;
   sources?: Source[];
 }
 
-interface HistoryItem {
+interface ConversationMeta {
   id: string;
-  question: string;
-  answer: string;
-  sources?: Source[];
-  createdAt: string;
+  title: string;
+  updatedAt: string;
+  turnCount: number;
 }
 
 const SUGGESTIONS = [
@@ -45,11 +44,33 @@ function cleanSnippet(text: string) {
   return text.replace(/\[NaN:NaN\]\s*/g, "");
 }
 
+// Group conversations into Today / Yesterday / Previous 7 days / Older.
+function groupByDate(items: ConversationMeta[]) {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayMs = 86400000;
+  const groups: { label: string; items: ConversationMeta[] }[] = [
+    { label: "Today", items: [] },
+    { label: "Yesterday", items: [] },
+    { label: "Previous 7 days", items: [] },
+    { label: "Older", items: [] },
+  ];
+  for (const it of items) {
+    const t = new Date(it.updatedAt).getTime();
+    if (t >= startOfToday) groups[0].items.push(it);
+    else if (t >= startOfToday - dayMs) groups[1].items.push(it);
+    else if (t >= startOfToday - 7 * dayMs) groups[2].items.push(it);
+    else groups[3].items.push(it);
+  }
+  return groups.filter((g) => g.items.length > 0);
+}
+
 export default function AskPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [conversations, setConversations] = useState<ConversationMeta[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const endRef = useRef<HTMLDivElement>(null);
@@ -60,19 +81,19 @@ export default function AskPage() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [turns, loading]);
 
-  const loadHistory = async () => {
+  const loadConversations = async () => {
     try {
-      const data = await api.getAskHistory();
-      setHistory(data.history || []);
+      const data = await api.getConversations();
+      setConversations(data.conversations || []);
     } catch (err) {
-      console.warn("Could not load ask history:", err);
+      console.warn("Could not load conversations:", err);
     }
   };
 
   useEffect(() => {
-    if (user) loadHistory();
+    if (user) loadConversations();
   }, [user]);
 
   const handleLogout = async () => {
@@ -80,54 +101,67 @@ export default function AskPage() {
     router.push("/");
   };
 
+  const newChat = () => {
+    setTurns([]);
+    setActiveId(null);
+    setInput("");
+  };
+
   const send = async (question: string) => {
     const q = question.trim();
     if (!q || loading) return;
 
-    setMessages((prev) => [...prev, { role: "user", text: q }]);
+    setTurns((prev) => [...prev, { role: "user", text: q }]);
     setInput("");
     setLoading(true);
 
     try {
-      const data = await api.ask(q);
-      setMessages((prev) => [
+      const data = await api.ask(q, 5, activeId || undefined);
+      setTurns((prev) => [
         ...prev,
         { role: "assistant", text: data.answer, sources: data.sources || [] },
       ]);
-      loadHistory();
+      if (data.conversationId) setActiveId(data.conversationId);
+      loadConversations();
     } catch (err) {
       console.warn("Ask failed:", err);
-      setMessages((prev) => [
+      setTurns((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          text: "Something went wrong reaching the assistant. Please try again.",
-        },
+        { role: "assistant", text: "Something went wrong reaching the assistant. Please try again." },
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const openHistory = (item: HistoryItem) => {
-    setMessages([
-      { role: "user", text: item.question },
-      { role: "assistant", text: item.answer, sources: item.sources || [] },
-    ]);
+  const openConversation = async (id: string) => {
+    if (id === activeId) return;
+    try {
+      const data = await api.getConversation(id);
+      const conv = data.conversation;
+      if (!conv) return;
+      setTurns(conv.turns || []);
+      setActiveId(id);
+    } catch (err) {
+      console.warn("Could not open conversation:", err);
+    }
   };
 
-  const removeHistory = async (id: string, e: React.MouseEvent) => {
+  const removeConversation = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setHistory((prev) => prev.filter((h) => h.id !== id));
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    if (id === activeId) newChat();
     try {
-      await api.deleteAskHistory(id);
+      await api.deleteConversation(id);
     } catch (err) {
-      console.warn("Could not delete history item:", err);
-      loadHistory();
+      console.warn("Could not delete conversation:", err);
+      loadConversations();
     }
   };
 
   if (authLoading || !user) return null;
+
+  const grouped = groupByDate(conversations);
 
   return (
     <div className={styles.layout}>
@@ -172,16 +206,11 @@ export default function AskPage() {
             <h1 className={styles.pageTitle}>Ask your meetings</h1>
             <p className={styles.pageSubtitle}>Search across every transcript with AI — answers cite the meetings they came from</p>
           </div>
-          {messages.length > 0 && (
-            <button className="btn btn-ghost" onClick={() => setMessages([])}>
-              + New chat
-            </button>
-          )}
         </header>
 
         <div className={ask.workspace}>
           <div className={ask.chat}>
-            {messages.length === 0 ? (
+            {turns.length === 0 ? (
               <div className={ask.empty}>
                 <div className={ask.emptyIcon}>💬</div>
                 <h3>Ask anything about your past meetings</h3>
@@ -196,7 +225,7 @@ export default function AskPage() {
               </div>
             ) : (
               <div className={ask.messages}>
-                {messages.map((m, i) => (
+                {turns.map((m, i) => (
                   <div key={i} className={`${ask.message} ${m.role === "user" ? ask.user : ask.assistant}`}>
                     <div className={ask.bubble}>{m.text}</div>
                     {m.sources && m.sources.length > 0 && (
@@ -236,7 +265,7 @@ export default function AskPage() {
             >
               <input
                 className={`input ${ask.composerInput}`}
-                placeholder="Ask about your meetings…"
+                placeholder={activeId ? "Ask a follow-up…" : "Ask about your meetings…"}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
@@ -248,22 +277,33 @@ export default function AskPage() {
           </div>
 
           <aside className={ask.historyPanel}>
-            <div className={ask.historyHeader}>History</div>
-            {history.length === 0 ? (
-              <p className={ask.historyEmpty}>Your past questions will show up here.</p>
+            <button className={ask.newChatBtn} onClick={newChat}>
+              <span>✏️</span> New chat
+            </button>
+            {conversations.length === 0 ? (
+              <p className={ask.historyEmpty}>Your conversations will show up here.</p>
             ) : (
-              <div className={ask.historyList}>
-                {history.map((item) => (
-                  <button key={item.id} className={ask.historyItem} onClick={() => openHistory(item)}>
-                    <span className={ask.historyQuestion}>{item.question}</span>
-                    <span
-                      className={ask.historyDelete}
-                      onClick={(e) => removeHistory(item.id, e)}
-                      aria-label="Delete"
-                    >
-                      ✕
-                    </span>
-                  </button>
+              <div className={ask.historyScroll}>
+                {grouped.map((group) => (
+                  <div key={group.label} className={ask.historyGroup}>
+                    <div className={ask.historyGroupLabel}>{group.label}</div>
+                    {group.items.map((c) => (
+                      <div
+                        key={c.id}
+                        className={`${ask.historyItem} ${c.id === activeId ? ask.historyItemActive : ""}`}
+                        onClick={() => openConversation(c.id)}
+                      >
+                        <span className={ask.historyQuestion}>{c.title}</span>
+                        <span
+                          className={ask.historyDelete}
+                          onClick={(e) => removeConversation(c.id, e)}
+                          aria-label="Delete conversation"
+                        >
+                          ✕
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}

@@ -53,7 +53,7 @@ function buildContext(chunks) {
     .join("\n\n");
 }
 
-async function ask(userId, question, topK = 5) {
+async function ask(userId, question, topK = 5, priorTurns = []) {
   const chunks = await retrieve(userId, question, topK);
 
   if (chunks.length === 0) {
@@ -82,7 +82,14 @@ async function ask(userId, question, topK = 5) {
     };
   }
 
-  const prompt = `${ANSWER_PROMPT}\n\nContext:\n${buildContext(chunks)}\n\nQuestion: ${question}\n\nAnswer:`;
+  const history = (priorTurns || [])
+    .slice(-6)
+    .map((t) => `${t.role === "user" ? "User" : "Assistant"}: ${t.text}`)
+    .join("\n");
+
+  const prompt = `${ANSWER_PROMPT}\n\n${
+    history ? `Conversation so far:\n${history}\n\n` : ""
+  }Context:\n${buildContext(chunks)}\n\nQuestion: ${question}\n\nAnswer:`;
 
   try {
     const result = await model.generateContent(prompt);

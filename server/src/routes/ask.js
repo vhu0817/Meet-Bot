@@ -6,54 +6,85 @@ const rag = require("../services/rag");
 
 const COLLECTION = "conversations";
 
-// POST /api/ask  { question }
-// Retrieval-augmented Q&A across the user's own meeting transcripts.
-// Persists each turn so the Ask page can show history.
+// POST /api/ask  { question, topK?, conversationId? }
+// Starts a new conversation or appends a turn to an existing one. Returns the
+// answer plus the conversation id/title so the sidebar can track threads.
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const { question, topK } = req.body;
+    const { question, topK, conversationId } = req.body;
 
     if (!question || typeof question !== "string" || !question.trim()) {
       return res.status(400).json({ error: "question is required" });
     }
 
     const k = Math.min(Math.max(parseInt(topK, 10) || 5, 1), 10);
-    const result = await rag.ask(req.user.uid, question.trim(), k);
+    const q = question.trim();
 
-    let id = null;
-    if (db) {
-      try {
-        const ref = await db.collection(COLLECTION).add({
-          userId: req.user.uid,
-          question: question.trim(),
-          answer: result.answer,
-          sources: result.sources || [],
-          createdAt: new Date().toISOString(),
-        });
-        id = ref.id;
-      } catch (e) {
-        console.warn("⚠️ Could not save conversation:", e.message);
+    // Load prior turns if continuing a thread (for follow-up context + ownership).
+    let convDoc = null;
+    let priorTurns = [];
+    if (conversationId && db) {
+      const snap = await db.collection(COLLECTION).doc(conversationId).get();
+      if (snap.exists && snap.data().userId === req.user.uid) {
+        convDoc = snap;
+        priorTurns = snap.data().turns || [];
       }
     }
 
-    res.json({ success: true, id, ...result });
+    const result = await rag.ask(req.user.uid, q, k, priorTurns);
+    const now = new Date().toISOString();
+
+    const userTurn = { role: "user", text: q, createdAt: now };
+    const assistantTurn = {
+      role: "assistant",
+      text: result.answer,
+      sources: result.sources || [],
+      createdAt: now,
+    };
+
+    let id = conversationId || null;
+    let title = convDoc ? convDoc.data().title : q.slice(0, 60);
+
+    if (db) {
+      try {
+        if (convDoc) {
+          await db.collection(COLLECTION).doc(id).update({
+            turns: [...priorTurns, userTurn, assistantTurn],
+            updatedAt: now,
+          });
+        } else {
+          const ref = await db.collection(COLLECTION).add({
+            userId: req.user.uid,
+            title,
+            turns: [userTurn, assistantTurn],
+            createdAt: now,
+            updatedAt: now,
+          });
+          id = ref.id;
+        }
+      } catch (e) {
+        console.warn("⚠️ Could not persist conversation:", e.message);
+      }
+    }
+
+    res.json({ success: true, conversationId: id, title, ...result });
   } catch (error) {
     console.error("Ask error:", error.message || error);
     res.status(500).json({ error: "Failed to answer question" });
   }
 });
 
-// GET /api/ask/history — past Q&A for this user, newest first.
-router.get("/history", requireAuth, async (req, res) => {
+// GET /api/ask/conversations — thread list for the sidebar (no full turns).
+router.get("/conversations", requireAuth, async (req, res) => {
   try {
-    if (!db) return res.json({ history: [] });
+    if (!db) return res.json({ conversations: [] });
 
     let snapshot;
     try {
       snapshot = await db
         .collection(COLLECTION)
         .where("userId", "==", req.user.uid)
-        .orderBy("createdAt", "desc")
+        .orderBy("updatedAt", "desc")
         .get();
     } catch (indexErr) {
       console.warn("⚠️ conversations index needed:", indexErr.message);
@@ -63,32 +94,57 @@ router.get("/history", requireAuth, async (req, res) => {
         .get();
     }
 
-    const history = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    history.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    const conversations = snapshot.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        title: d.title || "Untitled",
+        updatedAt: d.updatedAt || d.createdAt,
+        turnCount: (d.turns || []).length,
+      };
+    });
+    conversations.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
 
-    res.json({ history });
+    res.json({ conversations });
   } catch (error) {
-    console.error("History error:", error.message || error);
-    res.json({ history: [] });
+    console.error("Conversations list error:", error.message || error);
+    res.json({ conversations: [] });
   }
 });
 
-// DELETE /api/ask/history/:id — remove one saved Q&A.
-router.delete("/history/:id", requireAuth, async (req, res) => {
+// GET /api/ask/conversations/:id — full thread with all turns.
+router.get("/conversations/:id", requireAuth, async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!db) return res.json({ success: true, id });
+    if (!db) return res.json({ conversation: null });
 
-    const doc = await db.collection(COLLECTION).doc(id).get();
+    const doc = await db.collection(COLLECTION).doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: "Not found" });
     if (doc.data().userId !== req.user.uid) {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    await db.collection(COLLECTION).doc(id).delete();
-    res.json({ success: true, id });
+    res.json({ conversation: { id: doc.id, ...doc.data() } });
   } catch (error) {
-    console.error("History delete error:", error.message || error);
+    console.error("Conversation get error:", error.message || error);
+    res.status(500).json({ error: "Failed to load conversation" });
+  }
+});
+
+// DELETE /api/ask/conversations/:id
+router.delete("/conversations/:id", requireAuth, async (req, res) => {
+  try {
+    if (!db) return res.json({ success: true, id: req.params.id });
+
+    const doc = await db.collection(COLLECTION).doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: "Not found" });
+    if (doc.data().userId !== req.user.uid) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    await db.collection(COLLECTION).doc(req.params.id).delete();
+    res.json({ success: true, id: req.params.id });
+  } catch (error) {
+    console.error("Conversation delete error:", error.message || error);
     res.status(500).json({ error: "Failed to delete" });
   }
 });

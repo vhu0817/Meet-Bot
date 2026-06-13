@@ -87,14 +87,16 @@ export const api = {
       body: JSON.stringify({ transcript }),
     }),
 
-  ask: (question: string, topK = 5) =>
+  ask: (question: string, topK = 5, conversationId?: string) =>
     fetchAPI("/ask", {
       method: "POST",
-      body: JSON.stringify({ question, topK }),
+      body: JSON.stringify({ question, topK, conversationId }),
     }),
 
-  getAskHistory: () => fetchAPI("/ask/history"),
+  getConversations: () => fetchAPI("/ask/conversations"),
 
-  deleteAskHistory: (id: string) =>
-    fetchAPI(`/ask/history/${id}`, { method: "DELETE" }),
+  getConversation: (id: string) => fetchAPI(`/ask/conversations/${id}`),
+
+  deleteConversation: (id: string) =>
+    fetchAPI(`/ask/conversations/${id}`, { method: "DELETE" }),
 };
