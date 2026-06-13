@@ -3,7 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const EMBEDDING_DIM = 768;
-const EMBEDDING_MODEL = "text-embedding-004";
+const EMBEDDING_MODEL = "gemini-embedding-001";
 
 let genAI = null;
 let embeddingModel = null;
@@ -46,12 +46,17 @@ async function embedText(text) {
     return mockEmbedding(text);
   }
   try {
-    const result = await embeddingModel.embedContent(text);
+    const result = await embeddingModel.embedContent({
+      content: { parts: [{ text: String(text) }] },
+      outputDimensionality: EMBEDDING_DIM,
+    });
     const values = result?.embedding?.values;
     if (!Array.isArray(values) || values.length === 0) {
       return mockEmbedding(text);
     }
-    return values;
+    // Truncated Matryoshka vectors aren't unit-length — normalize so cosine
+    // stays consistent with the (already normalized) mock fallback.
+    return l2normalize(values);
   } catch (error) {
     console.error("❌ Embedding error:", error.message);
     return mockEmbedding(text);
