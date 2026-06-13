@@ -200,7 +200,7 @@ export default function AskPage() {
         </div>
       </aside>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} ${ask.askMain}`}>
         <header className={styles.header}>
           <div>
             <h1 className={styles.pageTitle}>Ask your meetings</h1>
