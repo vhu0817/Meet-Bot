@@ -3,13 +3,41 @@
   display: flex;
   min-height: 100vh;
   background: var(--bg-base);
+  position: relative;
+}
+/* Ambient aurora glow + grid, shared across all app pages */
+.layout::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px circle at 78% 8%, rgba(99,102,241,0.16), transparent 60%),
+    radial-gradient(520px circle at 95% 60%, rgba(139,92,246,0.12), transparent 60%),
+    radial-gradient(480px circle at 60% 100%, rgba(56,189,248,0.08), transparent 60%);
+}
+.layout::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 70% 0%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 50% at 70% 0%, #000 30%, transparent 100%);
 }
 
 /* ─── Sidebar ─────────────────────────────────────────────────── */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: var(--bg-surface);
+  background: rgba(15,17,23,0.7);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -97,6 +125,8 @@
   margin-left: 240px;
   padding: 32px;
   max-width: calc(100% - 240px);
+  position: relative;
+  z-index: 1;
 }
 
 .header {

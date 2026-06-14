@@ -14,13 +14,27 @@
   display: flex;
   min-height: 100vh;
   background: var(--bg-base);
+  position: relative;
+}
+.layout::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px circle at 78% 8%, rgba(99,102,241,0.16), transparent 60%),
+    radial-gradient(520px circle at 95% 60%, rgba(139,92,246,0.12), transparent 60%),
+    radial-gradient(480px circle at 60% 100%, rgba(56,189,248,0.08), transparent 60%);
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: var(--bg-surface);
+  background: rgba(15,17,23,0.7);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   padding: 24px 16px;
   display: flex;
@@ -30,6 +44,7 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  z-index: 1;
 }
 
 .sidebarLogo {
@@ -76,6 +91,8 @@
   flex: 1;
   padding: 32px 40px;
   max-width: 960px;
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Breadcrumb ─────────────────────────────────────────────── */
