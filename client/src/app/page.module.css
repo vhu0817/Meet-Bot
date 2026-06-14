@@ -1,5 +1,65 @@
 .main { position: relative; overflow-x: hidden; }
 
+/* ─── Animated aurora background ──────────────────────────────── */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.auroraBlob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  will-change: transform;
+}
+.blob1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(99,102,241,0.45), transparent 70%);
+  top: -180px; left: -120px;
+  animation: drift1 18s ease-in-out infinite;
+}
+.blob2 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(139,92,246,0.38), transparent 70%);
+  top: 10%; right: -160px;
+  animation: drift2 22s ease-in-out infinite;
+}
+.blob3 {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(56,189,248,0.25), transparent 70%);
+  bottom: -160px; left: 30%;
+  animation: drift3 26s ease-in-out infinite;
+}
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(120px, 80px) scale(1.15); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-100px, 120px) scale(1.1); }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(80px, -100px) scale(1.2); }
+}
+
+/* Subtle grid overlay */
+.grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
 /* ─── Nav ─────────────────────────────────────────────────────── */
 .nav {
   position: fixed;
@@ -47,7 +107,7 @@
 /* ─── Hero ────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  padding: 160px 0 100px;
+  padding: 150px 0 80px;
   text-align: center;
   z-index: 1;
 }
@@ -88,14 +148,19 @@
 }
 
 /* Stats */
+.statsWrap {
+  position: relative;
+  z-index: 1;
+  margin-top: 64px;
+}
 .statsRow {
   display: flex;
   gap: 48px;
-  margin-top: 40px;
   padding-top: 40px;
   border-top: 1px solid var(--border);
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
+  margin: 0 auto;
   justify-content: center;
 }
 .statItem {
@@ -116,6 +181,117 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* ─── Hero product mockup ─────────────────────────────────────── */
+.mockup {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 56px auto 0;
+  padding: 0 24px;
+  perspective: 1500px;
+}
+.mockupWindow {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.55), 0 0 60px rgba(99,102,241,0.12);
+}
+.mockupBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
+}
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mockupTitle {
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.recBadge { margin-left: auto; }
+.mockupBody {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0;
+  text-align: left;
+  min-height: 280px;
+}
+.transcriptCol {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-right: 1px solid var(--border);
+}
+.line {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.lineWho {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.lineText {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.summaryCol {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(99,102,241,0.06), transparent);
+}
+.summaryHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-light);
+  margin-bottom: 2px;
+}
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.summaryLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.summaryItem p {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+.due { color: var(--accent-light); font-weight: 600; }
 
 /* ─── Sections ────────────────────────────────────────────────── */
 .sectionHeader {
@@ -256,7 +432,10 @@
 /* Responsive */
 @media (max-width: 640px) {
   .heroForm { flex-direction: column; }
-  .statsRow { gap: 24px; }
+  .statsRow { gap: 24px; flex-wrap: wrap; }
   .navLinks { gap: 12px; }
   .navLink { display: none; }
+  .mockupBody { grid-template-columns: 1fr; }
+  .transcriptCol { border-right: none; border-bottom: 1px solid var(--border); }
+  .recBadge { display: none; }
 }
