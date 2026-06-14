@@ -62,9 +62,13 @@ def evaluate(prompt_versions=None, use_bertscore=True, use_judge=True):
             )))
 
             if use_bertscore:
-                row["bertscore_f1"] = metrics.bertscore(
-                    generated.get("executive_summary", ""), ref["executive_summary"]
-                )
+                try:
+                    row["bertscore_f1"] = metrics.bertscore(
+                        generated.get("executive_summary", ""), ref["executive_summary"]
+                    )
+                except ImportError:
+                    print("   bert_score not installed — skipping (pip install bert-score, or use --no-bertscore)")
+                    use_bertscore = False
 
             f1 = metrics.action_item_f1(generated.get("action_items"), ref.get("action_items"))
             row["ai_precision"] = f1["precision"]
@@ -76,9 +80,9 @@ def evaluate(prompt_versions=None, use_bertscore=True, use_judge=True):
                 row["judge_faithfulness"] = verdict.get("faithfulness")
                 row["judge_completeness"] = verdict.get("completeness")
                 row["judge_hallucination_free"] = verdict.get("hallucination_free")
-                time.sleep(0.5)  # be gentle on free-tier rate limits
 
             rows.append(row)
+            time.sleep(2)  # light pacing on top of retry/backoff to ease rate limits
 
     return pd.DataFrame(rows)
 

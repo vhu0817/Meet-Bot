@@ -120,7 +120,9 @@ def llm_judge(transcript, generated_summary, model_name=None):
     summary_text = json.dumps(generated_summary, indent=2)
     prompt = f"{JUDGE_PROMPT}\n\nTRANSCRIPT:\n{transcript_text}\n\nSUMMARY:\n{summary_text}"
 
-    resp = model.generate_content(prompt)
+    from gemini_utils import generate_with_retry
+
+    resp = generate_with_retry(model, prompt)
     try:
         verdict = _extract_json(resp.text)
     except Exception:

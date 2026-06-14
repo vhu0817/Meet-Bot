@@ -1,4 +1,9 @@
-prompt_version,meeting_id,rouge1,rouge2,rougeL,ai_precision,ai_recall,ai_f1
-v1_baseline,roadmap_q2,0.5476,0.2683,0.4524,1.0,1.0,1.0
-v1_baseline,eng_standup,0.5614,0.25,0.4211,0.6667,1.0,0.8
-v1_baseline,investor_prep,0.52,0.2245,0.34,0.6667,1.0,0.8
+prompt_version,meeting_id,rouge1,rouge2,rougeL,ai_precision,ai_recall,ai_f1,judge_faithfulness,judge_completeness,judge_hallucination_free
+v1_baseline,roadmap_q2,0.5,0.1892,0.3684,1.0,1.0,1.0,5,5,5
+v1_baseline,eng_standup,0.5818,0.2407,0.4909,0.6667,1.0,0.8,5,5,5
+v1_baseline,investor_prep,0.4889,0.2273,0.3111,0.6667,1.0,0.8,5,5,5
+v2_grounded,roadmap_q2,0.5135,0.1944,0.4324,1.0,1.0,1.0,5,5,5
+v2_grounded,eng_standup,0.5455,0.2474,0.4242,0.5,0.5,0.5,5,5,5
+v2_grounded,investor_prep,0.4773,0.1628,0.2727,1.0,1.0,1.0,4,4,5
+v3_grounded_recall,roadmap_q2,0.5185,0.2532,0.4198,1.0,1.0,1.0,3,3,5
+v3_grounded_recall,eng_standup,0.54,0.1837,0.44,0.6667,1.0,0.8,5,5,5

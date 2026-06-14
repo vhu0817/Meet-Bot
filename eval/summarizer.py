@@ -46,7 +46,9 @@ def summarize(transcript, system_prompt, model_name=MODEL_NAME):
     _ensure_configured()
     model = genai.GenerativeModel(model_name)
     prompt = f"{system_prompt}\n\nHere is the meeting transcript:\n\n{_format_transcript(transcript)}"
-    resp = model.generate_content(prompt)
+    from gemini_utils import generate_with_retry
+
+    resp = generate_with_retry(model, prompt)
     summary = _extract_json(resp.text)
     summary.setdefault("executive_summary", "")
     summary.setdefault("key_decisions", [])
